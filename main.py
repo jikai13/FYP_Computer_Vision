@@ -18,7 +18,7 @@ def control_loop(duration_sec):
     while time.time() < end_time:
 
     # GPIO.output('gpio_pin', GPIO.HIGH)
-    #
+    
     # time.sleep('setup')
 
             take_photo(0)
