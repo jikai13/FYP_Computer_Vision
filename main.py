@@ -56,15 +56,53 @@ def take_photo(cam_index):
         current_time = time.time()
         current_time_struct = time.localtime(current_time)
         timestamp = time.strftime("%Y-%m-%d_%H-%M-%S", current_time_struct)
-        photo_filename = f"D:\FYP\cam{cam_index}_photos/{timestamp}.jpg"
+        photo_filename = f"D:\FYP\cam{cam_index}_photos/{cam_index}_{timestamp}.jpg"
         cv2.imwrite(photo_filename, frame)
         print("Photo taken!")
 
     # Release the camera and close the window
     cap.release()
 
+def testing():
+    for i in range(10):  # Try indices from 0 to 9
+        cap = cv2.VideoCapture(i)
+        if cap.isOpened():
+            print(f"Camera index {i} opened successfully.")
+            break
+    else:
+        print("Error: Couldn't open any camera.")
+
+def vid_testing(cam_index):
+    # define a video capture object
+    vid = cv2.VideoCapture(cam_index)
+
+    while (True):
+
+        # Capture the video frame
+        # by frame
+        ret, frame = vid.read()
+
+        # Display the resulting frame
+        cv2.imshow('frame', frame)
+
+        # the 'q' button is set as the
+        # quitting button you may use any
+        # desired button of your choice
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # After the loop release the cap object
+    vid.release()
+    # Destroy all the windows
+    cv2.destroyAllWindows()
+
 if __name__ == '__main__':
-    control_loop(30)
+    #control_loop(30)
+    #folder_generation(3)
     #take_photo(0)
+    take_photo(1)
+    #take_photo(2)
+    #testing()
+    #vid_testing(1)
 
 
