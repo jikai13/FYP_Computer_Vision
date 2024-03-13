@@ -49,7 +49,7 @@ def threshold_largest_single(image_path, output_path):
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # Find contours
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) # Rounded: cv2.CHAIN_APPROX_SIMPLE
 
     if not contours:
         print("No contours found.")
@@ -60,6 +60,8 @@ def threshold_largest_single(image_path, output_path):
 
     # Find the largest contour based on area
     largest_contour = max(contours, key=cv2.contourArea)
+
+    print(f"Contour: {largest_contour}")
 
     # Calculate the area of the largest contour
     largest_area = cv2.contourArea(largest_contour)
@@ -84,6 +86,41 @@ def threshold_largest_single(image_path, output_path):
 
         cv2.circle(image, highest_point, radius=2, color=(0, 0, 255), thickness=-1)
 
+
+    # Initialize volume
+    volume = 0
+    pixel_area = 1  # Define the area of a pixel, adjust if you know the scale
+
+    # Iterate over the height of the image
+    for y in range(image.shape[0]):
+
+        # print(f"y:{y}")
+
+        radius = 0
+        # Find the points on the contour that align with the current y-coordinate
+        aligned_points = [pt[0] for pt in largest_contour if pt[0][1] == y]
+
+        # Check if there are at least two points to define a radius
+        if len(aligned_points) >= 2:
+            # Find the x-coordinates of the points
+            x_coords = [pt[0] for pt in aligned_points]
+
+            # Calculate the radius as half the difference between the max and min x-coordinates
+            radius = (max(x_coords) - min(x_coords)) / 2.0
+
+
+            # Draw a line on the original image at this y-coordinate
+            cv2.line(image, (0, y), (image.shape[1], y), (0, 255, 255), 1) # Yellow Line
+        elif len(aligned_points) == 1:
+            # Fallback to centroid-based radius calculation
+            # Calculate distance from each point to the centroid's x-coordinate and use the maximum as the radius
+            radius = abs(aligned_points[0][0] - cx)
+
+            # Draw a line on the original image at this y-coordinate to show centroid-based radius calculation
+            cv2.line(image, (0, y), (image.shape[1], y), (255, 0, 0), 1)  # Red line
+
+        volume += np.pi * (radius ** 2) * pixel_area
+
     # cv2.imshow('All Contours', image)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
@@ -91,7 +128,9 @@ def threshold_largest_single(image_path, output_path):
     # Save the contour image
     cv2.imwrite(output_path, image)
 
-    return largest_area, highest_point
+
+
+    return largest_area, highest_point, volume
 
 def threshold_full(folder_path, output_folder_path):
 
@@ -113,6 +152,8 @@ def threshold_largest(folder_path, output_folder_path):
 
     highest_point_listing = []
 
+    volume_listing = []
+
     time_listing = list(range(1, len(frame_listing) + 1))
 
     for frame in frame_listing:
@@ -121,11 +162,13 @@ def threshold_largest(folder_path, output_folder_path):
 
         output_path = f'{output_folder_path}/{frame}'
 
-        area, highest_point = threshold_largest_single(frame_path, output_path)
+        area, highest_point, volume = threshold_largest_single(frame_path, output_path)
 
         area_listing.append(area)
 
         highest_point_listing.append(highest_point)
+
+        volume_listing.append(volume)
 
     fig, ax = plt.subplots()
 
@@ -188,6 +231,16 @@ def threshold_largest(folder_path, output_folder_path):
 
     fig4.savefig(f'{output_folder_path}/Vertical Velocity Plot')
 
+    fig5, ax5 = plt.subplots()
+
+    ax5.plot(time_listing, volume_listing)
+
+    ax5.set(xlabel='Time (Minutes)', ylabel='Explant Volume (Pixels Cubed)',
+            title='Explant Volume as a function of time')
+
+    ax5.grid()
+
+    fig5.savefig(f'{output_folder_path}/Explant Volume Plot')
 
 
 def detect_edges(image_path, blur_kernel_size=(5, 5), threshold1=100, threshold2=200):
@@ -267,7 +320,7 @@ if __name__ == '__main__':
     # hsv_upper_bound = [180, 85, 200]  # Example upper HSV bound
     # segment_explant_by_color(image_path, hsv_lower_bound, hsv_upper_bound)
     folder_path = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Frames Precise"
-    output_folder_path = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise Otsu"
+    output_folder_path = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise Otsu No Round"
     threshold_largest(folder_path, output_folder_path)
-    # threshold_largest_single(image_path, r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise")
+    #threshold_largest_single(image_path, r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise")
 
