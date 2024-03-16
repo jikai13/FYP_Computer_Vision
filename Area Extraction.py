@@ -3,6 +3,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import math
+import csv
+from itertools import zip_longest
 
 
 def threshold_full_single(image_path, output_path):
@@ -61,7 +63,7 @@ def threshold_largest_single(image_path, output_path):
     # Find the largest contour based on area
     largest_contour = max(contours, key=cv2.contourArea)
 
-    print(f"Contour: {largest_contour}")
+    # print(f"Contour: {largest_contour}")
 
     # Calculate the area of the largest contour
     largest_area = cv2.contourArea(largest_contour)
@@ -83,13 +85,19 @@ def threshold_largest_single(image_path, output_path):
         aligned_points = [pt[0] for pt in largest_contour if abs(pt[0][0] - cx) <= x_tolerance]
 
         highest_point = min(aligned_points, key=lambda pt: pt[1])
+        lowest_point = max(aligned_points, key=lambda pt: pt[1])
 
         cv2.circle(image, highest_point, radius=2, color=(0, 0, 255), thickness=-1)
+        cv2.circle(image, lowest_point, radius=2, color=(0, 0, 255), thickness=-1)
+
+        contour_height = lowest_point[1] - highest_point[1]
 
 
     # Initialize volume
     volume = 0
     pixel_area = 1  # Define the area of a pixel, adjust if you know the scale
+    largest_width = 0
+    smallest_width = float('inf')
 
     # Iterate over the height of the image
     for y in range(image.shape[0]):
@@ -97,6 +105,7 @@ def threshold_largest_single(image_path, output_path):
         # print(f"y:{y}")
 
         radius = 0
+        diameter = 0
         # Find the points on the contour that align with the current y-coordinate
         aligned_points = [pt[0] for pt in largest_contour if pt[0][1] == y]
 
@@ -108,6 +117,12 @@ def threshold_largest_single(image_path, output_path):
             # Calculate the radius as half the difference between the max and min x-coordinates
             radius = (max(x_coords) - min(x_coords)) / 2.0
 
+            diameter = 2*radius
+
+            if diameter > largest_width:
+                largest_width = diameter
+            if diameter < smallest_width:
+                smallest_width = diameter
 
             # Draw a line on the original image at this y-coordinate
             cv2.line(image, (0, y), (image.shape[1], y), (0, 255, 255), 1) # Yellow Line
@@ -130,7 +145,7 @@ def threshold_largest_single(image_path, output_path):
 
 
 
-    return largest_area, highest_point, volume
+    return largest_area, highest_point, volume, contour_height, largest_width, smallest_width
 
 def threshold_full(folder_path, output_folder_path):
 
@@ -154,7 +169,13 @@ def threshold_largest(folder_path, output_folder_path):
 
     volume_listing = []
 
-    time_listing = list(range(1, len(frame_listing) + 1))
+    height_listing = []
+
+    largest_width_listing = []
+
+    smallest_width_listing = []
+
+    time_listing = list(range(0, len(frame_listing)))
 
     for frame in frame_listing:
 
@@ -162,13 +183,19 @@ def threshold_largest(folder_path, output_folder_path):
 
         output_path = f'{output_folder_path}/{frame}'
 
-        area, highest_point, volume = threshold_largest_single(frame_path, output_path)
+        area, highest_point, volume, height, largest_width, smallest_width = threshold_largest_single(frame_path, output_path)
 
         area_listing.append(area)
 
         highest_point_listing.append(highest_point)
 
         volume_listing.append(volume)
+
+        height_listing.append(height)
+
+        largest_width_listing.append(largest_width)
+
+        smallest_width_listing.append(smallest_width)
 
     fig, ax = plt.subplots()
 
@@ -241,6 +268,24 @@ def threshold_largest(folder_path, output_folder_path):
     ax5.grid()
 
     fig5.savefig(f'{output_folder_path}/Explant Volume Plot')
+
+    headings = ['Frames', 'Explant Height', 'Largest Width', 'Smallest Width', 'Explant Area', 'Explant Volume', 'Vertical Trajectory', 'Lateral Trajectory', 'Vertical Velocity']
+
+    combined_data = zip_longest(time_listing, height_listing, largest_width_listing, smallest_width_listing, area_listing, volume_listing, highest_point_y, highest_point_x, velocities, fillvalue='')
+
+    with open(f'{output_folder_path}/Explant_Data.csv', 'w', newline='') as file:
+
+        writer = csv.writer(file)
+
+        writer.writerow(headings)
+
+        writer.writerows(combined_data)
+
+
+
+
+
+
 
 
 def detect_edges(image_path, blur_kernel_size=(5, 5), threshold1=100, threshold2=200):
