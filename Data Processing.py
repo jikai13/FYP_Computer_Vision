@@ -45,3 +45,4 @@ if __name__ == '__main__':
     num_frames = 40
     crop_coords = (345, 210, 55, 190)  # Example coordinates (x, y, width, height)
     extract_and_crop_frames(video_path, output_folder, num_frames, crop_coords)
+

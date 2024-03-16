@@ -74,6 +74,19 @@ async def async_control_loop(duration, interval, cam_amount):
             await async_take_photo(i)
             await asyncio.sleep(interval) # Delay
 
+def camera_loop(duration, interval, cam_indexes):
+    start_time = time.time()
+    end_time = start_time + duration
+
+    while time.time() < end_time:
+        loop_start_time = time.time()
+        for cam_index in range(cam_indexes):
+            take_photo(cam_index)
+        loop_end_time = time.time()
+        total_loop_duration = loop_end_time - loop_start_time
+        wait_time = interval - total_loop_duration
+        if wait_time > 0:
+            time.sleep(wait_time)
 
 def folder_generation(cam_amount):
 
