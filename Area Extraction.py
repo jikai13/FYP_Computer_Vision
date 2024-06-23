@@ -78,7 +78,7 @@ def threshold_largest_single(image_path, output_path):
         cy = int(M["m01"] / M["m00"])
         # Draw a vertical centerline through the centroid of the largest contour
         height = image.shape[0]
-        cv2.line(image, (cx, 0), (cx, height), (255, 0, 0), 1)  # Drawn in blue with thickness 2
+        #cv2.line(image, (cx, 0), (cx, height), (255, 0, 0), 1)  # Drawn in blue with thickness 2
 
         # Find points on the contour close to the centroid's x-coordinate
         x_tolerance = 2  # Define a tolerance range
@@ -87,8 +87,8 @@ def threshold_largest_single(image_path, output_path):
         highest_point = min(aligned_points, key=lambda pt: pt[1])
         lowest_point = max(aligned_points, key=lambda pt: pt[1])
 
-        cv2.circle(image, highest_point, radius=2, color=(0, 0, 255), thickness=-1)
-        cv2.circle(image, lowest_point, radius=2, color=(0, 0, 255), thickness=-1)
+        #cv2.circle(image, highest_point, radius=2, color=(0, 0, 255), thickness=-1)
+        #cv2.circle(image, lowest_point, radius=2, color=(0, 0, 255), thickness=-1)
 
         contour_height = lowest_point[1] - highest_point[1]
 
@@ -125,14 +125,14 @@ def threshold_largest_single(image_path, output_path):
                 smallest_width = diameter
 
             # Draw a line on the original image at this y-coordinate
-            cv2.line(image, (0, y), (image.shape[1], y), (0, 255, 255), 1) # Yellow Line
+            # cv2.line(image, (0, y), (image.shape[1], y), (0, 255, 255), 1) # Yellow Line
         elif len(aligned_points) == 1:
             # Fallback to centroid-based radius calculation
             # Calculate distance from each point to the centroid's x-coordinate and use the maximum as the radius
             radius = abs(aligned_points[0][0] - cx)
 
             # Draw a line on the original image at this y-coordinate to show centroid-based radius calculation
-            cv2.line(image, (0, y), (image.shape[1], y), (255, 0, 0), 1)  # Red line
+            #cv2.line(image, (0, y), (image.shape[1], y), (255, 0, 0), 1)  # Red line
 
         volume += np.pi * (radius ** 2) * pixel_area
 
@@ -201,7 +201,7 @@ def threshold_largest(folder_path, output_folder_path):
 
     ax.plot(time_listing, area_listing)
 
-    ax.set(xlabel='Time (Minutes)', ylabel='Area (Pixels)',
+    ax.set(xlabel='Time (Minutes)', ylabel='Area (Pixels Squared)',
            title='Explant Area as a function of Time')
 
     ax.grid()
@@ -368,4 +368,12 @@ if __name__ == '__main__':
     output_folder_path = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise Otsu No Round"
     threshold_largest(folder_path, output_folder_path)
     #threshold_largest_single(image_path, r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise")
-
+    # Use Case 1
+    # folder_path1 = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\TimeLapse 03_25_2024_10_18_29 Frames"
+    # output_folder_path1 = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\TimeLapse 03_25_2024_10_18_29 Threshold"
+    # threshold_largest(folder_path1, output_folder_path1)
+    # Use Case 2
+    # folder_path2 = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\TimeLapse 03_25_2024_10_18_29 Barrel Correct Frames"
+    # output_folder_path2 = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\TimeLapse 03_25_2024_10_18_29 Threshold Barrel"
+    # threshold_largest(folder_path2, output_folder_path2)
+    #threshold_largest(r"D:\FYP\test", r"D:\FYP")
