@@ -32,7 +32,7 @@ def threshold_full_single(image_path, output_path):
     return area
 
 
-def threshold_largest_single(image_path, output_path):
+def frame_analysis_single(image_path, output_path):
     # Read the image
     image = cv2.imread(image_path)
 
@@ -159,7 +159,7 @@ def threshold_full(folder_path, output_folder_path):
 
         threshold_full_single(frame_path, output_path)
 
-def threshold_largest(folder_path, output_folder_path):
+def frame_analysis(folder_path, output_folder_path):
 
     frame_listing = os.listdir(folder_path)
 
@@ -366,7 +366,7 @@ if __name__ == '__main__':
     # segment_explant_by_color(image_path, hsv_lower_bound, hsv_upper_bound)
     folder_path = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Frames Precise"
     output_folder_path = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise Otsu No Round"
-    threshold_largest(folder_path, output_folder_path)
+    frame_analysis(folder_path, output_folder_path)
     #threshold_largest_single(image_path, r"C:\Users\wujik\OneDrive - Imperial College London\FYP\17 5cm 50um resistor + explant 3 (1-7) Threshold Largest Precise")
     # Use Case 1
     # folder_path1 = r"C:\Users\wujik\OneDrive - Imperial College London\FYP\TimeLapse 03_25_2024_10_18_29 Frames"
